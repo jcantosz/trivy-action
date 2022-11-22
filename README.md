@@ -11,7 +11,11 @@
 ## Table of Contents
 
 - [Usage](#usage)
-  - [Workflow](#workflow)
+  - [Scan CI Pipelines](#scan-ci-pipelines)
+  - [Scan CI Pipelines (with Trivy Config)](#scan-ci-pipelines-with-trivy-config)
+  - [Order of prerference for options](#order-of-prerference-for-options)
+  - [Scanning a Tarball](#scanning-a-tarball)
+  - [Outputting an HTML report](#Outputting-an-html-report)
   - [Docker Image Scanning](#using-trivy-with-github-code-scanning)
   - [Git Repository Scanning](#using-trivy-to-scan-your-git-repo)
 - [Customizing](#customizing)
@@ -121,6 +125,30 @@ jobs:
         severity: 'CRITICAL,HIGH'
 ```
 
+### Outputting an HTML report
+```yaml
+name: build
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Run Trivy vulnerability scanner in fs mode
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        format: template
+        template: @contrib/html.tpl
+        output: trivy-results.html
+```
 ### Using Trivy with GitHub Code Scanning
 If you have [GitHub code scanning](https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/about-code-scanning) available you can use Trivy as a scanning tool as follows:
 ```yaml
@@ -474,7 +502,7 @@ jobs:
 
 ## Customizing
 
-### inputs
+### Inputs
 
 Following inputs can be used as `step.with` keys:
 
@@ -484,8 +512,8 @@ Following inputs can be used as `step.with` keys:
 | `input`           | String  |                                    | Tar reference, e.g. `alpine-latest.tar`                                                         |
 | `image-ref`       | String  |                                    | Image reference, e.g. `alpine:3.10.2`                                                           |
 | `scan-ref`        | String  | `/github/workspace/`               | Scan reference, e.g. `/github/workspace/` or `.`                                                |
-| `format`          | String  | `table`                            | Output format (`table`, `json`, `sarif`, `github`)                                              |
-| `template`        | String  |                                    | Output template (`@/contrib/gitlab.tpl`, `@/contrib/junit.tpl`)                                 |
+| `format`          | String  | `table`                            | Output format (`table`, `json`, `sarif`, `github`, `template`)                                  |
+| `template`        | String  |                                    | Output template (`@/contrib/gitlab.tpl`, `@/contrib/junit.tpl`, `@contrib/html.tpl`)            |
 | `output`          | String  |                                    | Save results to a file                                                                          |
 | `exit-code`       | String  | `0`                                | Exit code when specified vulnerabilities are found                                              |
 | `ignore-unfixed`  | Boolean | false                              | Ignore unpatched/unfixed vulnerabilities                                                        |
